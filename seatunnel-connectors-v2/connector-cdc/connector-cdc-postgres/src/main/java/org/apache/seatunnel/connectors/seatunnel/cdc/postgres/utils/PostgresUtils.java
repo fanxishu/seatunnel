@@ -90,7 +90,7 @@ public class PostgresUtils {
         // accurate than COUNT(*), but is more efficient for large table.
         final String rowCountQuery =
                 String.format(
-                        "SELECT reltuples FROM pg_class r WHERE relkind = 'r' AND relname = '%s';",
+                        "SELECT reltuples FROM pg_class r WHERE (relkind = 'r' or   relkind = 'p') AND  relname = '%s';",
                         tableId.table());
         return jdbc.queryAndMap(
                 rowCountQuery,
