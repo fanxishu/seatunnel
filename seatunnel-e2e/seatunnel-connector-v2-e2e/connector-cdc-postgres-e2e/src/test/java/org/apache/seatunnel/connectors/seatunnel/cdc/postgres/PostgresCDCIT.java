@@ -93,9 +93,11 @@ public class PostgresCDCIT extends TestSuiteBase implements TestResource {
     private static final String SOURCE_TABLE_1 = "postgres_cdc_table_1";
     private static final String SOURCE_TABLE_2 = "postgres_cdc_table_2";
     private static final String SOURCE_TABLE_3 = "postgres_cdc_table_3";
+    private static final String SOURCE_PARTITIONED_TABLE = "source_partitioned_table";
     private static final String SINK_TABLE_1 = "sink_postgres_cdc_table_1";
     private static final String SINK_TABLE_2 = "sink_postgres_cdc_table_2";
     private static final String SINK_TABLE_3 = "sink_postgres_cdc_table_3";
+    private static final String SINK_PARTITIONED_TABLE = "sink_partitioned_table";
 
     private static final String SOURCE_TABLE_NO_PRIMARY_KEY = "full_types_no_primary_key";
 
@@ -193,6 +195,45 @@ public class PostgresCDCIT extends TestSuiteBase implements TestResource {
         }
     }
 
+    @TestTemplate
+    public void testPostgresPartitionedTableE2e(TestContainer container) {
+
+        try {
+            CompletableFuture.supplyAsync(
+                    () -> {
+                        try {
+                            container.executeJob("/postgrescdc_to_postgres_with_partition.conf");
+                        } catch (Exception e) {
+                            log.error("Commit task exception :" + e.getMessage());
+                            throw new RuntimeException(e);
+                        }
+                        return null;
+                    });
+            await().atMost(60000, TimeUnit.MILLISECONDS)
+                    .untilAsserted(
+                            () -> {
+                                Assertions.assertIterableEquals(
+                                        query(getQuerySQL(POSTGRESQL_SCHEMA, SOURCE_PARTITIONED_TABLE)),
+                                        query(getQuerySQL(POSTGRESQL_SCHEMA, SINK_PARTITIONED_TABLE)));
+                            });
+
+            // insert update delete
+            upsertDeleteSourceTable(POSTGRESQL_SCHEMA, SOURCE_PARTITIONED_TABLE);
+
+            // stream stage
+            await().atMost(60000, TimeUnit.MILLISECONDS)
+                    .untilAsserted(
+                            () -> {
+                                Assertions.assertIterableEquals(
+                                        query(getQuerySQL(POSTGRESQL_SCHEMA, SOURCE_PARTITIONED_TABLE)),
+                                        query(getQuerySQL(POSTGRESQL_SCHEMA, SINK_PARTITIONED_TABLE)));
+                            });
+        } finally {
+            // Clear related content to ensure that multiple operations are not affected
+            clearTable(POSTGRESQL_SCHEMA, SOURCE_PARTITIONED_TABLE);
+            clearTable(POSTGRESQL_SCHEMA, SINK_PARTITIONED_TABLE);
+        }
+    }
     @TestTemplate
     @DisabledOnContainer(
             value = {},
