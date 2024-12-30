@@ -213,8 +213,14 @@ public class PostgresCDCIT extends TestSuiteBase implements TestResource {
                     .untilAsserted(
                             () -> {
                                 Assertions.assertIterableEquals(
-                                        query(getQuerySQL(POSTGRESQL_SCHEMA, SOURCE_PARTITIONED_TABLE)),
-                                        query(getQuerySQL(POSTGRESQL_SCHEMA, SINK_PARTITIONED_TABLE)));
+                                        query(
+                                                getQuerySQL(
+                                                        POSTGRESQL_SCHEMA,
+                                                        SOURCE_PARTITIONED_TABLE)),
+                                        query(
+                                                getQuerySQL(
+                                                        POSTGRESQL_SCHEMA,
+                                                        SINK_PARTITIONED_TABLE)));
                             });
 
             // insert update delete
@@ -225,8 +231,14 @@ public class PostgresCDCIT extends TestSuiteBase implements TestResource {
                     .untilAsserted(
                             () -> {
                                 Assertions.assertIterableEquals(
-                                        query(getQuerySQL(POSTGRESQL_SCHEMA, SOURCE_PARTITIONED_TABLE)),
-                                        query(getQuerySQL(POSTGRESQL_SCHEMA, SINK_PARTITIONED_TABLE)));
+                                        query(
+                                                getQuerySQL(
+                                                        POSTGRESQL_SCHEMA,
+                                                        SOURCE_PARTITIONED_TABLE)),
+                                        query(
+                                                getQuerySQL(
+                                                        POSTGRESQL_SCHEMA,
+                                                        SINK_PARTITIONED_TABLE)));
                             });
         } finally {
             // Clear related content to ensure that multiple operations are not affected
@@ -234,6 +246,7 @@ public class PostgresCDCIT extends TestSuiteBase implements TestResource {
             clearTable(POSTGRESQL_SCHEMA, SINK_PARTITIONED_TABLE);
         }
     }
+
     @TestTemplate
     @DisabledOnContainer(
             value = {},
