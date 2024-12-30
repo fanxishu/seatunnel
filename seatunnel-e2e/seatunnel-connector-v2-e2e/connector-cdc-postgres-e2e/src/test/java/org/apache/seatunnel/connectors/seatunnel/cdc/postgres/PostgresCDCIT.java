@@ -800,14 +800,14 @@ public class PostgresCDCIT extends TestSuiteBase implements TestResource {
                         + database
                         + "."
                         + tableName
-                        + " VALUES (1, 'Sample Data 1', '2023-06-15 10:30:00');");
+                        + " VALUES (3, 'Sample Data 1', '2023-06-15 10:30:00');");
 
         executeSql(
                 "INSERT INTO "
                         + database
                         + "."
                         + tableName
-                        + " VALUES (2, 'Sample Data 2', '2023-07-20 15:45:00');");
+                        + " VALUES (4, 'Sample Data 2', '2023-07-20 15:45:00');");
 
         // 删除指定记录
         executeSql(
@@ -815,7 +815,7 @@ public class PostgresCDCIT extends TestSuiteBase implements TestResource {
                         + database
                         + "."
                         + tableName
-                        + " WHERE id = 1 AND event_time = '2023-06-15 10:30:00';");
+                        + " WHERE id = 3 AND event_time = '2023-06-15 10:30:00';");
 
         // 更新指定记录
         executeSql(
@@ -823,7 +823,7 @@ public class PostgresCDCIT extends TestSuiteBase implements TestResource {
                         + database
                         + "."
                         + tableName
-                        + " SET data = 'Updated Data' WHERE id = 2 AND event_time = '2023-07-20 15:45:00';");
+                        + " SET data = 'Updated Data' WHERE id = 4 AND event_time = '2023-07-20 15:45:00';");
     }
 
     private String getQuerySQL(String database, String tableName) {
