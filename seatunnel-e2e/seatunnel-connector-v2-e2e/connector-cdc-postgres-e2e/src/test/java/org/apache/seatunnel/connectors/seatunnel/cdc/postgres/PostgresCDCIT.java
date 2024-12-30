@@ -794,7 +794,6 @@ public class PostgresCDCIT extends TestSuiteBase implements TestResource {
     }
 
     private void upsertDeleteSourcePartionTable(String database, String tableName) {
-        // 插入新记录到 source_partitioned_table
         executeSql(
                 "INSERT INTO "
                         + database
@@ -809,7 +808,6 @@ public class PostgresCDCIT extends TestSuiteBase implements TestResource {
                         + tableName
                         + " VALUES (4, 'Sample Data 2', '2023-07-20 15:45:00');");
 
-        // 删除指定记录
         executeSql(
                 "DELETE FROM "
                         + database
@@ -817,7 +815,6 @@ public class PostgresCDCIT extends TestSuiteBase implements TestResource {
                         + tableName
                         + " WHERE id = 3 AND event_time = '2023-06-15 10:30:00';");
 
-        // 更新指定记录
         executeSql(
                 "UPDATE "
                         + database
