@@ -251,7 +251,7 @@ public class PostgresDialect implements JdbcDialect {
         if (useTableStats) {
             String rowCountQuery =
                     String.format(
-                            "SELECT reltuples FROM pg_class r WHERE relkind = 'r' AND relname = '%s';",
+                            "SELECT reltuples FROM pg_class r WHERE  (relkind = 'r' or   relkind = 'p') AND  relname = '%s';",
                             table.getTablePath().getTableName());
             try (Statement stmt = connection.createStatement()) {
                 log.info("Split Chunk, approximateRowCntStatement: {}", rowCountQuery);
