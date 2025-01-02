@@ -169,7 +169,7 @@ CREATE TABLE sink_postgres_cdc_table_3
 );
 
 
--- 创建源分区表
+
 CREATE TABLE source_partitioned_table
 (
     id             INTEGER NOT NULL,
@@ -178,7 +178,7 @@ CREATE TABLE source_partitioned_table
     PRIMARY KEY (id, event_time)
 ) PARTITION BY RANGE (event_time);
 
--- 创建源分区
+
 CREATE TABLE source_partitioned_table_2023
     PARTITION OF source_partitioned_table
     FOR VALUES FROM ('2023-01-01 00:00:00') TO ('2024-01-01 00:00:00');
@@ -187,7 +187,7 @@ CREATE TABLE source_partitioned_table_2024
     PARTITION OF source_partitioned_table
     FOR VALUES FROM ('2024-01-01 00:00:00') TO ('2025-01-01 00:00:00');
 
--- 创建目标分区表
+
 CREATE TABLE sink_partitioned_table
 (
     id             INTEGER NOT NULL,
@@ -196,7 +196,7 @@ CREATE TABLE sink_partitioned_table
     PRIMARY KEY (id, event_time)
 ) PARTITION BY RANGE (event_time);
 
--- 创建目标分区
+
 CREATE TABLE sink_partitioned_table_2023
     PARTITION OF sink_partitioned_table
     FOR VALUES FROM ('2023-01-01 00:00:00') TO ('2024-01-01 00:00:00');
@@ -205,11 +205,11 @@ CREATE TABLE sink_partitioned_table_2024
     PARTITION OF sink_partitioned_table
     FOR VALUES FROM ('2024-01-01 00:00:00') TO ('2025-01-01 00:00:00');
 
--- 设置复制标识，支持 PostgreSQL CDC
+
 ALTER TABLE source_partitioned_table REPLICA IDENTITY FULL;
 ALTER TABLE sink_partitioned_table REPLICA IDENTITY FULL;
 
--- 插入测试数据到源分区表
+
 INSERT INTO source_partitioned_table (id, data, event_time)
 VALUES (1, 'Partitioned data 2023', '2023-06-01 12:00:00'),
        (2, 'Partitioned data 2024', '2024-03-15 09:30:00');
