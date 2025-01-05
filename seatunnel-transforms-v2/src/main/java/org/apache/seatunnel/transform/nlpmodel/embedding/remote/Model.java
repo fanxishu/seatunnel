@@ -15,24 +15,16 @@
  * limitations under the License.
  */
 
-package org.apache.seatunnel.e2e.connector.doris;
+package org.apache.seatunnel.transform.nlpmodel.embedding.remote;
 
-import org.apache.seatunnel.e2e.common.container.TestContainer;
-
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.TestTemplate;
-import org.testcontainers.containers.Container;
-
+import java.io.Closeable;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.List;
 
-public class DorisNoSchemaIT extends DorisIT {
+public interface Model extends Closeable {
 
-    @TestTemplate
-    public void testDoris(TestContainer container) throws IOException, InterruptedException {
-        initializeJdbcTable();
-        batchInsertUniqueTableData();
-        Container.ExecResult execResult1 = container.executeJob("/doris_source_no_schema.conf");
-        Assertions.assertEquals(0, execResult1.getExitCode());
-        checkSinkData();
-    }
+    List<ByteBuffer> vectorization(Object[] fields) throws IOException;
+
+    Integer dimension() throws IOException;
 }
