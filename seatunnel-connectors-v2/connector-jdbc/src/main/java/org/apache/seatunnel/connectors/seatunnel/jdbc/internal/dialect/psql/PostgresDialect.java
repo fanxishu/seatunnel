@@ -244,14 +244,14 @@ public class PostgresDialect implements JdbcDialect {
         boolean useTableStats =
                 StringUtils.isBlank(table.getQuery())
                         || (!table.getQuery().toLowerCase().contains("where")
-                                && table.getTablePath() != null
-                                && !TablePath.DEFAULT
-                                        .getFullName()
-                                        .equals(table.getTablePath().getFullName()));
+                        && table.getTablePath() != null
+                        && !TablePath.DEFAULT
+                        .getFullName()
+                        .equals(table.getTablePath().getFullName()));
         if (useTableStats) {
             String rowCountQuery =
                     String.format(
-                            "SELECT reltuples FROM pg_class r WHERE  (relkind = 'r' or   relkind = 'p') AND  relname = '%s';",
+                            "SELECT reltuples FROM pg_class r WHERE relkind = 'r' AND relname = '%s';",
                             table.getTablePath().getTableName());
             try (Statement stmt = connection.createStatement()) {
                 log.info("Split Chunk, approximateRowCntStatement: {}", rowCountQuery);
