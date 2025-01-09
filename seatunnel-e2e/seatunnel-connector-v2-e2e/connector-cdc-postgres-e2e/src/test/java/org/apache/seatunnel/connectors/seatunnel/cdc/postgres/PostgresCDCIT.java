@@ -17,8 +17,6 @@
 
 package org.apache.seatunnel.connectors.seatunnel.cdc.postgres;
 
-import org.apache.seatunnel.shade.com.google.common.collect.Lists;
-
 import org.apache.seatunnel.common.utils.SeaTunnelException;
 import org.apache.seatunnel.connectors.cdc.base.config.JdbcSourceConfigFactory;
 import org.apache.seatunnel.connectors.seatunnel.cdc.postgres.config.PostgresSourceConfigFactory;
@@ -45,6 +43,7 @@ import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.lifecycle.Startables;
 import org.testcontainers.utility.DockerImageName;
 
+import com.beust.jcommander.internal.Lists;
 import io.debezium.jdbc.JdbcConnection;
 import io.debezium.relational.TableId;
 import lombok.extern.slf4j.Slf4j;
@@ -144,6 +143,7 @@ public class PostgresCDCIT extends TestSuiteBase implements TestResource {
     @Override
     public void startUp() {
         log.info("The second stage: Starting Postgres containers...");
+
         POSTGRES_CONTAINER.setPortBindings(
                 Lists.newArrayList(
                         String.format(
@@ -209,6 +209,7 @@ public class PostgresCDCIT extends TestSuiteBase implements TestResource {
                         }
                         return null;
                     });
+
             await().atMost(60000, TimeUnit.MILLISECONDS)
                     .untilAsserted(
                             () -> {
@@ -240,6 +241,7 @@ public class PostgresCDCIT extends TestSuiteBase implements TestResource {
                                                         POSTGRESQL_SCHEMA,
                                                         SINK_PARTITIONED_TABLE)));
                             });
+            System.out.println("111");
         } finally {
             // Clear related content to ensure that multiple operations are not affected
             clearTable(POSTGRESQL_SCHEMA, SOURCE_PARTITIONED_TABLE);
@@ -799,28 +801,23 @@ public class PostgresCDCIT extends TestSuiteBase implements TestResource {
                         + database
                         + "."
                         + tableName
-                        + " VALUES (3, 'Sample Data 1', '2023-06-15 10:30:00');");
+                        + " VALUES (2, 'Sample Data 1', '2023-06-15 10:30:00');");
 
         executeSql(
                 "INSERT INTO "
                         + database
                         + "."
                         + tableName
-                        + " VALUES (4, 'Sample Data 2', '2023-07-20 15:45:00');");
+                        + " VALUES (3, 'Sample Data 2', '2023-07-20 15:45:00');");
 
-        executeSql(
-                "DELETE FROM "
-                        + database
-                        + "."
-                        + tableName
-                        + " WHERE id = 3 AND event_time = '2023-06-15 10:30:00';");
+        executeSql("DELETE FROM " + database + "." + tableName + " WHERE id = 2;");
 
         executeSql(
                 "UPDATE "
                         + database
                         + "."
                         + tableName
-                        + " SET data = 'Updated Data' WHERE id = 4 AND event_time = '2023-07-20 15:45:00';");
+                        + " SET data = 'Updated Data' WHERE id = 3;");
     }
 
     private String getQuerySQL(String database, String tableName) {
