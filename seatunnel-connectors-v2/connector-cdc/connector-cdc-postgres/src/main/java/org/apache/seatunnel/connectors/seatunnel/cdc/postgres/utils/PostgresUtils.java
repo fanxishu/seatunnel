@@ -103,18 +103,19 @@ public class PostgresUtils {
         String version = resolveVersion(jdbc);
         log.info("Detected PostgreSQL version: {}", version);
 
-        // 判断版本是否大于等于13
+        // Determine if the version is greater than or equal to 13
         boolean isVersion13OrAbove = isPostgresVersion13OrAbove(version);
 
         final String rowCountQuery;
         if (isVersion13OrAbove) {
-            // 大于等于 13 的查询
+            // Query if the version is greater than or equal to 13
             rowCountQuery =
                     String.format(
                             "SELECT reltuples FROM pg_class r WHERE (relkind = 'r' OR relkind = 'p') AND relname = '%s';",
                             tableId.table());
         } else {
-            // 低于 13 的查询或替代方案
+            // Provide an alternative if the version requirement is not met (i.e., if the version is
+            // less than 13)
             rowCountQuery =
                     String.format(
                             "SELECT reltuples FROM pg_class r WHERE relkind = 'r' AND relname = '%s';",
@@ -136,13 +137,13 @@ public class PostgresUtils {
     }
 
     private static boolean isPostgresVersion13OrAbove(String version) {
-        // 从 PostgreSQL 版本字符串中提取主要版本号
+        // Extracting the major version number from a PostgreSQL version string
         if (version == null || version.isEmpty()) {
             log.warn("PostgreSQL version is empty or null. Assuming version < 13.");
             return false;
         }
         try {
-            // 例如 "PostgreSQL 13.3 (Ubuntu 13.3-1.pgdg20.04+1)" 提取出 "13"
+            //  "PostgreSQL 13.3 (Ubuntu 13.3-1.pgdg20.04+1)" 提取出 "13"
             String[] parts = version.split(" ");
             for (String part : parts) {
                 if (part.matches("\\d+(\\.\\d+)?")) { // 匹配数字版本
