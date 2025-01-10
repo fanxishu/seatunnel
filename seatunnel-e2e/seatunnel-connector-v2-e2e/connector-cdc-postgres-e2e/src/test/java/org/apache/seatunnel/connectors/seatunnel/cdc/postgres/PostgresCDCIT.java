@@ -93,6 +93,7 @@ public class PostgresCDCIT extends TestSuiteBase implements TestResource {
     private static final String SOURCE_TABLE_2 = "postgres_cdc_table_2";
     private static final String SOURCE_TABLE_3 = "postgres_cdc_table_3";
     private static final String SOURCE_PARTITIONED_TABLE = "source_partitioned_table";
+    private static final String SOURCE_PARTITIONED_TABLE_2023 = "source_partitioned_table_2023";
     private static final String SINK_TABLE_1 = "sink_postgres_cdc_table_1";
     private static final String SINK_TABLE_2 = "sink_postgres_cdc_table_2";
     private static final String SINK_TABLE_3 = "sink_postgres_cdc_table_3";
@@ -195,9 +196,60 @@ public class PostgresCDCIT extends TestSuiteBase implements TestResource {
         }
     }
 
+    private static String resolveVersion(Connection jdbc) {
+        try (Statement statement = jdbc.createStatement();
+                ResultSet resultSet = statement.executeQuery("SELECT version()")) {
+            resultSet.next();
+            return resultSet.getString(1);
+        } catch (Exception e) {
+            log.info(
+                    "Failed to get PostgreSQL version, fallback to default version: {}",
+                    e.getMessage(),
+                    e);
+            return "";
+        }
+    }
+
+    private static boolean isPostgresVersion13OrAbove(String version) {
+        // 从 PostgreSQL 版本字符串中提取主要版本号
+        if (version == null || version.isEmpty()) {
+            log.warn("PostgreSQL version is empty or null. Assuming version < 13.");
+            return false;
+        }
+        try {
+            // 例如 "PostgreSQL 13.3 (Ubuntu 13.3-1.pgdg20.04+1)" 提取出 "13"
+            String[] parts = version.split(" ");
+            for (String part : parts) {
+                if (part.matches("\\d+(\\.\\d+)?")) { // 匹配数字版本
+                    int majorVersion = Integer.parseInt(part.split("\\.")[0]);
+                    return majorVersion >= 13;
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Failed to parse PostgreSQL version: {}. Assuming version < 13.", version, e);
+        }
+        return false;
+    }
+
     @TestTemplate
     public void testPostgresPartitionedTableE2e(TestContainer container) {
+        try (Connection connection = getJdbcConnection(); ) {
+            String version = resolveVersion(connection);
+            log.info("Detected PostgreSQL version: {}", version);
 
+            // 判断版本是否大于等于13
+            boolean isVersion13OrAbove = isPostgresVersion13OrAbove(version);
+            if (isVersion13OrAbove) {
+                Partition13(container);
+            } else {
+                Partition12(container);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void Partition13(TestContainer container) {
         try {
             CompletableFuture.supplyAsync(
                     () -> {
@@ -241,10 +293,61 @@ public class PostgresCDCIT extends TestSuiteBase implements TestResource {
                                                         POSTGRESQL_SCHEMA,
                                                         SINK_PARTITIONED_TABLE)));
                             });
-            System.out.println("111");
         } finally {
             // Clear related content to ensure that multiple operations are not affected
             clearTable(POSTGRESQL_SCHEMA, SOURCE_PARTITIONED_TABLE);
+            clearTable(POSTGRESQL_SCHEMA, SINK_PARTITIONED_TABLE);
+        }
+    }
+
+    public void Partition12(TestContainer container) {
+        try {
+            CompletableFuture.supplyAsync(
+                    () -> {
+                        try {
+                            container.executeJob("/postgrescdc_to_postgres_with_partition12.conf");
+                        } catch (Exception e) {
+                            log.error("Commit task exception :" + e.getMessage());
+                            throw new RuntimeException(e);
+                        }
+                        return null;
+                    });
+
+            await().atMost(60000, TimeUnit.MILLISECONDS)
+                    .untilAsserted(
+                            () -> {
+                                Assertions.assertIterableEquals(
+                                        query(
+                                                getQuerySQL(
+                                                        POSTGRESQL_SCHEMA,
+                                                        SOURCE_PARTITIONED_TABLE_2023)),
+                                        query(
+                                                getQuerySQL(
+                                                        POSTGRESQL_SCHEMA,
+                                                        SINK_PARTITIONED_TABLE)));
+                            });
+
+            // insert update delete
+            upsertDeleteSourcePartionTable(POSTGRESQL_SCHEMA, SOURCE_PARTITIONED_TABLE_2023);
+
+            // stream stage
+            await().atMost(60000, TimeUnit.MILLISECONDS)
+                    .untilAsserted(
+                            () -> {
+                                Assertions.assertIterableEquals(
+                                        query(
+                                                getQuerySQL(
+                                                        POSTGRESQL_SCHEMA,
+                                                        SOURCE_PARTITIONED_TABLE_2023)),
+                                        query(
+                                                getQuerySQL(
+                                                        POSTGRESQL_SCHEMA,
+                                                        SINK_PARTITIONED_TABLE)));
+                            });
+
+        } finally {
+            // Clear related content to ensure that multiple operations are not affected
+            clearTable(POSTGRESQL_SCHEMA, SOURCE_PARTITIONED_TABLE_2023);
             clearTable(POSTGRESQL_SCHEMA, SINK_PARTITIONED_TABLE);
         }
     }
