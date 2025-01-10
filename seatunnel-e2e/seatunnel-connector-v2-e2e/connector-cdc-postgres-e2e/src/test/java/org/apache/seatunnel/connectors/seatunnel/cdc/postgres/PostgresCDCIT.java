@@ -211,16 +211,15 @@ public class PostgresCDCIT extends TestSuiteBase implements TestResource {
     }
 
     private static boolean isPostgresVersion13OrAbove(String version) {
-        // 从 PostgreSQL 版本字符串中提取主要版本号
+
         if (version == null || version.isEmpty()) {
             log.warn("PostgreSQL version is empty or null. Assuming version < 13.");
             return false;
         }
         try {
-            // 例如 "PostgreSQL 13.3 (Ubuntu 13.3-1.pgdg20.04+1)" 提取出 "13"
             String[] parts = version.split(" ");
             for (String part : parts) {
-                if (part.matches("\\d+(\\.\\d+)?")) { // 匹配数字版本
+                if (part.matches("\\d+(\\.\\d+)?")) {
                     int majorVersion = Integer.parseInt(part.split("\\.")[0]);
                     return majorVersion >= 13;
                 }
@@ -236,8 +235,6 @@ public class PostgresCDCIT extends TestSuiteBase implements TestResource {
         try (Connection connection = getJdbcConnection(); ) {
             String version = resolveVersion(connection);
             log.info("Detected PostgreSQL version: {}", version);
-
-            // 判断版本是否大于等于13
             boolean isVersion13OrAbove = isPostgresVersion13OrAbove(version);
             if (isVersion13OrAbove) {
                 Partition13(container);
