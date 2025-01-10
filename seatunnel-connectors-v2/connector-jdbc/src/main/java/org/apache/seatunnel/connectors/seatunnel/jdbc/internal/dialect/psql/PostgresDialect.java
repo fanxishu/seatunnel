@@ -244,10 +244,10 @@ public class PostgresDialect implements JdbcDialect {
         boolean useTableStats =
                 StringUtils.isBlank(table.getQuery())
                         || (!table.getQuery().toLowerCase().contains("where")
-                        && table.getTablePath() != null
-                        && !TablePath.DEFAULT
-                        .getFullName()
-                        .equals(table.getTablePath().getFullName()));
+                                && table.getTablePath() != null
+                                && !TablePath.DEFAULT
+                                        .getFullName()
+                                        .equals(table.getTablePath().getFullName()));
         if (useTableStats) {
             String rowCountQuery =
                     String.format(
