@@ -143,10 +143,10 @@ public class PostgresUtils {
             return false;
         }
         try {
-            //  "PostgreSQL 13.3 (Ubuntu 13.3-1.pgdg20.04+1)" 提取出 "13"
+            //  "PostgreSQL 13.3 (Ubuntu 13.3-1.pgdg20.04+1)"  "13"
             String[] parts = version.split(" ");
             for (String part : parts) {
-                if (part.matches("\\d+(\\.\\d+)?")) { // 匹配数字版本
+                if (part.matches("\\d+(\\.\\d+)?")) { // Matching numeric versions
                     int majorVersion = Integer.parseInt(part.split("\\.")[0]);
                     return majorVersion >= 13;
                 }
