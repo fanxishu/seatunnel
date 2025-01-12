@@ -32,7 +32,6 @@ import org.apache.seatunnel.engine.common.Constant;
 import org.apache.seatunnel.engine.common.config.EngineConfig;
 import org.apache.seatunnel.engine.common.config.server.ConnectorJarStorageConfig;
 import org.apache.seatunnel.engine.common.config.server.ScheduleStrategy;
-import org.apache.seatunnel.engine.common.config.server.ServerConfigOptions;
 import org.apache.seatunnel.engine.common.exception.JobException;
 import org.apache.seatunnel.engine.common.exception.JobNotFoundException;
 import org.apache.seatunnel.engine.common.exception.SavePointFailedException;
@@ -397,24 +396,6 @@ public class CoordinatorService {
         ownedSlotProfilesIMap =
                 nodeEngine.getHazelcastInstance().getMap(Constant.IMAP_OWNED_SLOT_PROFILES);
         metricsImap = nodeEngine.getHazelcastInstance().getMap(Constant.IMAP_RUNNING_JOB_METRICS);
-        IMap<Long, JobHistoryService.JobState> finishedJobStateImap =
-                nodeEngine.getHazelcastInstance().getMap(Constant.IMAP_FINISHED_JOB_STATE);
-        IMap<Long, JobMetrics> finishedJobMetricsImap =
-                nodeEngine.getHazelcastInstance().getMap(Constant.IMAP_FINISHED_JOB_METRICS);
-        IMap<Long, JobDAGInfo> finishedJobVertexInfoImap =
-                nodeEngine.getHazelcastInstance().getMap(Constant.IMAP_FINISHED_JOB_VERTEX_INFO);
-        if (ServerConfigOptions.IS_INIT_HISTORY_FINISH_JOB.defaultValue()) {
-            for (Map.Entry<Long, JobHistoryService.JobState> entry :
-                    finishedJobStateImap.entrySet()) {
-                finishedJobStateImap.delete(entry.getKey());
-            }
-            for (Map.Entry<Long, JobMetrics> entry : finishedJobMetricsImap.entrySet()) {
-                finishedJobMetricsImap.delete(entry.getKey());
-            }
-            for (Map.Entry<Long, JobDAGInfo> entry : finishedJobVertexInfoImap.entrySet()) {
-                finishedJobVertexInfoImap.delete(entry.getKey());
-            }
-        }
         jobHistoryService =
                 new JobHistoryService(
                         nodeEngine,
@@ -422,9 +403,13 @@ public class CoordinatorService {
                         logger,
                         pendingJobMasterMap,
                         runningJobMasterMap,
-                        finishedJobStateImap,
-                        finishedJobMetricsImap,
-                        finishedJobVertexInfoImap,
+                        nodeEngine.getHazelcastInstance().getMap(Constant.IMAP_FINISHED_JOB_STATE),
+                        nodeEngine
+                                .getHazelcastInstance()
+                                .getMap(Constant.IMAP_FINISHED_JOB_METRICS),
+                        nodeEngine
+                                .getHazelcastInstance()
+                                .getMap(Constant.IMAP_FINISHED_JOB_VERTEX_INFO),
                         engineConfig.getHistoryJobExpireMinutes());
         eventProcessor =
                 createJobEventProcessor(

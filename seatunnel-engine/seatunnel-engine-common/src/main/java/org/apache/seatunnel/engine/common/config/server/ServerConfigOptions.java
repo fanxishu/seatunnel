@@ -156,12 +156,6 @@ public class ServerConfigOptions {
                     .intType()
                     .defaultValue(1440)
                     .withDescription("The expire time of history jobs.time unit minute");
-    public static final Option<Boolean> IS_INIT_HISTORY_FINISH_JOB =
-            Options.key("is-init-history-finish-job")
-                    .booleanType()
-                    .defaultValue(false)
-                    .withDescription(
-                            "During the restart of a persistent cluster, is it necessary to reload the information related to completed jobs from the persistence files anew?");
     public static final Option<ScheduleStrategy> JOB_SCHEDULE_STRATEGY =
             Options.key("job-schedule-strategy")
                     .enumType(ScheduleStrategy.class)
