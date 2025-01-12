@@ -17,7 +17,6 @@
 
 package org.apache.seatunnel.engine.server;
 
-import org.apache.seatunnel.engine.common.config.server.ServerConfigOptions;
 import org.apache.seatunnel.shade.com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import org.apache.seatunnel.api.common.metrics.JobMetrics;
@@ -33,6 +32,7 @@ import org.apache.seatunnel.engine.common.Constant;
 import org.apache.seatunnel.engine.common.config.EngineConfig;
 import org.apache.seatunnel.engine.common.config.server.ConnectorJarStorageConfig;
 import org.apache.seatunnel.engine.common.config.server.ScheduleStrategy;
+import org.apache.seatunnel.engine.common.config.server.ServerConfigOptions;
 import org.apache.seatunnel.engine.common.exception.JobException;
 import org.apache.seatunnel.engine.common.exception.JobNotFoundException;
 import org.apache.seatunnel.engine.common.exception.SavePointFailedException;
@@ -403,8 +403,9 @@ public class CoordinatorService {
                 nodeEngine.getHazelcastInstance().getMap(Constant.IMAP_FINISHED_JOB_METRICS);
         IMap<Long, JobDAGInfo> finishedJobVertexInfoImap =
                 nodeEngine.getHazelcastInstance().getMap(Constant.IMAP_FINISHED_JOB_VERTEX_INFO);
-        if(ServerConfigOptions.IS_INIT_HISTORY_FINISH_JOB.defaultValue()){
-            for (Map.Entry<Long, JobHistoryService.JobState> entry : finishedJobStateImap.entrySet()) {
+        if (ServerConfigOptions.IS_INIT_HISTORY_FINISH_JOB.defaultValue()) {
+            for (Map.Entry<Long, JobHistoryService.JobState> entry :
+                    finishedJobStateImap.entrySet()) {
                 finishedJobStateImap.delete(entry.getKey());
             }
             for (Map.Entry<Long, JobMetrics> entry : finishedJobMetricsImap.entrySet()) {
