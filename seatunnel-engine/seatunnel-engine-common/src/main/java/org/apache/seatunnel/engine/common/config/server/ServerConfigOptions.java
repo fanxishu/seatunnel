@@ -156,6 +156,7 @@ public class ServerConfigOptions {
                     .intType()
                     .defaultValue(1440)
                     .withDescription("The expire time of history jobs.time unit minute");
+
     public static final Option<ScheduleStrategy> JOB_SCHEDULE_STRATEGY =
             Options.key("job-schedule-strategy")
                     .enumType(ScheduleStrategy.class)
