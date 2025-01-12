@@ -160,7 +160,8 @@ public class ServerConfigOptions {
             Options.key("is-init-history-finish-job")
                     .booleanType()
                     .defaultValue(false)
-                    .withDescription("During the restart of a persistent cluster, is it necessary to reload the information related to completed jobs from the persistence files anew?");
+                    .withDescription(
+                            "During the restart of a persistent cluster, is it necessary to reload the information related to completed jobs from the persistence files anew?");
     public static final Option<ScheduleStrategy> JOB_SCHEDULE_STRATEGY =
             Options.key("job-schedule-strategy")
                     .enumType(ScheduleStrategy.class)
